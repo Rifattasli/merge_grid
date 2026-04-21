@@ -1,0 +1,6 @@
+abstract interface class AnalyticsService {
+  Future<void> logEvent(
+    String name, {
+    Map<String, Object?> parameters = const <String, Object?>{},
+  });
+}
