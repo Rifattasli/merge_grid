@@ -8,6 +8,7 @@ import '../core/services/storage_service.dart';
 import '../features/game/presentation/controllers/game_controller.dart';
 import '../features/settings/presentation/controllers/settings_controller.dart';
 import 'router.dart';
+import 'app_theme.dart';
 
 class MergeGridApp extends StatelessWidget {
   const MergeGridApp({
@@ -48,11 +49,7 @@ class MergeGridApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Merge Grid',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1F7A8C)),
-          scaffoldBackgroundColor: const Color(0xFFF4F1EA),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.build(),
         onGenerateRoute: AppRouter.onGenerateRoute,
         initialRoute: AppRouter.homeRoute,
       ),

@@ -65,7 +65,6 @@ class PlaceBlockUseCase {
           ? session.nextBlock
           : _spawnService.createNextBlock(
               turnCount: nextTurnCount,
-              occupiedCells: resolution.board.occupiedCellCount,
               highestBlockLevel: resolution.board.highestBlockLevel,
             ),
       status: hasLost ? GameStatus.gameOver : GameStatus.inProgress,

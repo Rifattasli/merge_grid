@@ -14,7 +14,6 @@ class StartGameUseCase {
       board: BoardEntity.empty(),
       nextBlock: _spawnService.createNextBlock(
         turnCount: 0,
-        occupiedCells: 0,
         highestBlockLevel: 1,
       ),
       startedAt: sessionStartTime,

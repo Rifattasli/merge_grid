@@ -1,14 +1,16 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../app/app_theme.dart';
+import '../../../../app/app_widgets.dart';
 import '../../../../core/services/ads_service.dart';
 import '../../../../core/services/analytics_service.dart';
 import '../controllers/game_controller.dart';
 import '../widgets/game_board_view.dart';
 import '../widgets/game_hud.dart';
 import '../widgets/game_over_overlay.dart';
+import '../widgets/next_block_preview.dart';
 import '../widgets/pause_overlay.dart';
 
 class GamePage extends StatefulWidget {
@@ -19,115 +21,163 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
+  static const double _pagePadding = 12;
+  static const double _boardFramePadding = 8;
+  static const double _boardFrameRadius = 28;
+  static const double _buttonHeight = 48;
+  static const double _bottomRowHeight = 78;
+  static const double _sectionSpacing = 10;
+
   bool _isPaused = false;
   bool _isHandlingAdFlow = false;
 
   @override
   Widget build(BuildContext context) {
-    final GameController gameController = context.watch<GameController>();
+    final GameController gameController = context.read<GameController>();
     final AdsService adsService = context.read<AdsService>();
     final AnalyticsService analyticsService = context.read<AnalyticsService>();
-    final bool showGameOver = gameController.session.isGameOver;
 
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           tooltip: 'Back',
+          style: IconButton.styleFrom(
+            backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+          ),
           onPressed: () {
             Navigator.of(context).maybePop();
           },
         ),
-        title: const Text('Game'),
+        title: const Text('Merge Grid'),
       ),
-      body: SafeArea(
+      body: AppBackground(
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.fromLTRB(
+                _pagePadding,
+                _pagePadding,
+                _pagePadding,
+                10,
+              ),
               child: Column(
                 children: [
-                  GameHud(
-                    score: gameController.session.score,
-                    bestScore: gameController.bestScore,
-                    coins: gameController.displayedCoins,
-                    hasIdleCoinFlow: gameController.hasIdleCoinFlow,
-                    onPausePressed: () {
-                      setState(() {
-                        _isPaused = true;
-                      });
+                  Selector<
+                    GameController,
+                    ({
+                      int score,
+                      int bestScore,
+                      int coins,
+                      bool hasIdleCoinFlow,
+                    })
+                  >(
+                    selector: (_, GameController controller) => (
+                      score: controller.session.score,
+                      bestScore: controller.bestScore,
+                      coins: controller.displayedCoins,
+                      hasIdleCoinFlow: controller.hasIdleCoinFlow,
+                    ),
+                    builder: (context, hudData, _) {
+                      return GameHud(
+                        score: hudData.score,
+                        bestScore: hudData.bestScore,
+                        coins: hudData.coins,
+                        hasIdleCoinFlow: hudData.hasIdleCoinFlow,
+                        onPausePressed: () {
+                          setState(() {
+                            _isPaused = true;
+                          });
+                        },
+                      );
                     },
                   ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFFBF5),
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(
-                        'Next block: Level ${gameController.session.nextBlock.level.value}',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF5A4A3C),
-                            ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: _sectionSpacing),
                   Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE5D8C6),
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x14000000),
-                              blurRadius: 16,
-                              offset: Offset(0, 10),
-                            ),
-                          ],
+                    child: Center(
+                      child: AppPanel(
+                        radius: _boardFrameRadius,
+                        padding: const EdgeInsets.all(_boardFramePadding),
+                        backgroundColor: AppColors.warmCream.withValues(
+                          alpha: 0.94,
                         ),
-                        padding: const EdgeInsets.all(8),
-                        child: GameBoardView(controller: gameController),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0C6A8),
+                              borderRadius: BorderRadius.circular(
+                                _boardFrameRadius - 6,
+                              ),
+                            ),
+                            padding: const EdgeInsets.all(_boardFramePadding),
+                            child: GameBoardView(controller: gameController),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    showGameOver
-                        ? 'No moves left for this run.'
-                        : 'Tap an empty cell to place the next block.',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF6B5B4B),
-                    ),
-                    textAlign: TextAlign.center,
+                  const SizedBox(height: _sectionSpacing),
+                  Selector<GameController, bool>(
+                    selector: (_, GameController controller) =>
+                        controller.session.isGameOver,
+                    builder: (context, showGameOver, _) {
+                      return Text(
+                        showGameOver
+                            ? 'No moves left for this run.'
+                            : 'Tap an empty cell to place the next block.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.cocoaSoft,
+                          height: 1.15,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: _sectionSpacing),
                   SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isHandlingAdFlow
-                          ? null
-                          : () {
-                              unawaited(
-                                _startNewGame(
-                                  gameController: gameController,
-                                  adsService: adsService,
-                                  analyticsService: analyticsService,
-                                  fromCompletedRun: showGameOver,
-                                ),
+                    height: _bottomRowHeight,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Selector<GameController, int>(
+                            selector: (_, GameController controller) =>
+                                controller.session.nextBlock.level.value,
+                            builder: (context, level, _) {
+                              return NextBlockPreview(level: level);
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: _sectionSpacing),
+                        SizedBox(
+                          width: 118,
+                          height: _buttonHeight,
+                          child: Selector<GameController, bool>(
+                            selector: (_, GameController controller) =>
+                                controller.session.isGameOver,
+                            builder: (context, showGameOver, _) {
+                              return ElevatedButton(
+                                onPressed: _isHandlingAdFlow
+                                    ? null
+                                    : () {
+                                        unawaited(
+                                          _startNewGame(
+                                            gameController: gameController,
+                                            adsService: adsService,
+                                            analyticsService: analyticsService,
+                                            fromCompletedRun: showGameOver,
+                                          ),
+                                        );
+                                      },
+                                child: const Text('New Game'),
                               );
                             },
-                      child: const Text('New Game'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -153,36 +203,59 @@ class _GamePageState extends State<GamePage> {
                   },
                 ),
               ),
-            if (showGameOver)
-              Positioned.fill(
-                child: GameOverOverlay(
-                  score: gameController.session.score,
-                  bestScore: gameController.bestScore,
-                  coins: gameController.displayedCoins,
-                  canContinue: gameController.canContinueAfterGameOver,
-                  onContinuePressed: _isHandlingAdFlow
-                      ? () {}
-                      : () {
-                          unawaited(
-                            _handleRewardedContinue(
-                              gameController: gameController,
-                              adsService: adsService,
-                              analyticsService: analyticsService,
-                            ),
-                          );
-                        },
-                  onRestartPressed: () {
-                    unawaited(
-                      _startNewGame(
-                        gameController: gameController,
-                        adsService: adsService,
-                        analyticsService: analyticsService,
-                        fromCompletedRun: true,
-                      ),
-                    );
-                  },
-                ),
+            Selector<
+              GameController,
+              ({
+                bool showGameOver,
+                int score,
+                int bestScore,
+                int coins,
+                bool canContinue,
+              })
+            >(
+              selector: (_, GameController controller) => (
+                showGameOver: controller.session.isGameOver,
+                score: controller.session.score,
+                bestScore: controller.bestScore,
+                coins: controller.displayedCoins,
+                canContinue: controller.canContinueAfterGameOver,
               ),
+              builder: (context, overlayData, _) {
+                if (!overlayData.showGameOver) {
+                  return const SizedBox.shrink();
+                }
+
+                return Positioned.fill(
+                  child: GameOverOverlay(
+                    score: overlayData.score,
+                    bestScore: overlayData.bestScore,
+                    coins: overlayData.coins,
+                    canContinue: overlayData.canContinue,
+                    onContinuePressed: _isHandlingAdFlow
+                        ? () {}
+                        : () {
+                            unawaited(
+                              _handleRewardedContinue(
+                                gameController: gameController,
+                                adsService: adsService,
+                                analyticsService: analyticsService,
+                              ),
+                            );
+                          },
+                    onRestartPressed: () {
+                      unawaited(
+                        _startNewGame(
+                          gameController: gameController,
+                          adsService: adsService,
+                          analyticsService: analyticsService,
+                          fromCompletedRun: true,
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),

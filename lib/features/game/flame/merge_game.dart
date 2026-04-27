@@ -15,7 +15,7 @@ class MergeGame extends FlameGame {
   int _lastFeedbackSequence = 0;
 
   @override
-  Color backgroundColor() => const Color(0xFFF4F1EA);
+  Color backgroundColor() => const Color(0xFFF1DFC8);
 
   @override
   Future<void> onLoad() async {

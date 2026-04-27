@@ -12,6 +12,7 @@ import 'package:merge_grid/features/game/domain/enums/block_level.dart';
 import 'package:merge_grid/features/game/domain/enums/game_status.dart';
 import 'package:merge_grid/features/game/presentation/controllers/game_controller.dart';
 import 'package:merge_grid/features/game/presentation/pages/game_page.dart';
+import 'package:merge_grid/features/game/presentation/widgets/game_board_view.dart';
 import '../../../helpers/fake_ads_service.dart';
 import '../../../helpers/fake_analytics_service.dart';
 import '../../../helpers/fake_audio_service.dart';
@@ -148,5 +149,89 @@ void main() {
     await tester.pump();
 
     expect(adsService.interstitialShowAttempts, 1);
+  });
+
+  testWidgets('next block preview highlights when the level changes', (
+    WidgetTester tester,
+  ) async {
+    final FakeAdsService adsService = FakeAdsService();
+    final FakeAudioService audioService = FakeAudioService();
+    final FakeAnalyticsService analyticsService = FakeAnalyticsService();
+    final GameController controller = GameController(
+      storageService: InMemoryStorageService(),
+      audioService: audioService,
+      analyticsService: analyticsService,
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          Provider<AdsService>.value(value: adsService),
+          Provider<AudioService>.value(value: audioService),
+          Provider<AnalyticsService>.value(value: analyticsService),
+          ChangeNotifierProvider<GameController>(create: (_) => controller),
+        ],
+        child: const MaterialApp(home: GamePage()),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('NEXT BLOCK'), findsOneWidget);
+    expect(find.text('LVL 1'), findsOneWidget);
+    expect(find.text('NEW LVL'), findsNothing);
+
+    controller.restoreSession(
+      controller.session.copyWith(
+        nextBlock: const BlockEntity(id: 'next-updated', level: BlockLevel.two),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('LVL 2'), findsOneWidget);
+    expect(find.text('NEW LVL'), findsOneWidget);
+  });
+
+  testWidgets('game board keeps the same size when game state updates', (
+    WidgetTester tester,
+  ) async {
+    final FakeAdsService adsService = FakeAdsService();
+    final FakeAudioService audioService = FakeAudioService();
+    final FakeAnalyticsService analyticsService = FakeAnalyticsService();
+    final GameController controller = GameController(
+      storageService: InMemoryStorageService(),
+      audioService: audioService,
+      analyticsService: analyticsService,
+    );
+
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          Provider<AdsService>.value(value: adsService),
+          Provider<AudioService>.value(value: audioService),
+          Provider<AnalyticsService>.value(value: analyticsService),
+          ChangeNotifierProvider<GameController>(create: (_) => controller),
+        ],
+        child: const MaterialApp(home: GamePage()),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final Size initialSize = tester.getSize(find.byType(GameBoardView));
+
+    controller.restoreSession(
+      controller.session.copyWith(
+        nextBlock: const BlockEntity(
+          id: 'next-updated',
+          level: BlockLevel.three,
+        ),
+        score: 128,
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final Size updatedSize = tester.getSize(find.byType(GameBoardView));
+
+    expect(updatedSize, initialSize);
   });
 }

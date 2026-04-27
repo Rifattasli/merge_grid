@@ -39,9 +39,6 @@ class GameController extends ChangeNotifier {
        _bestScore = storageService.getBestScore(),
        _totalCoins = storageService.getTotalCoins() {
     _highestBlockReachedThisRun = _session.board.highestBlockLevel;
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      notifyListeners();
-    });
     _logGameStart();
   }
 
@@ -53,7 +50,6 @@ class GameController extends ChangeNotifier {
   final PlaceBlockUseCase _placeBlockUseCase;
   final ContinueGameUseCase _continueGameUseCase;
   GameSessionEntity _session;
-  late final Timer _ticker;
   int _bestScore;
   int _totalCoins;
   bool _hasUsedContinueThisRun = false;
@@ -236,7 +232,6 @@ class GameController extends ChangeNotifier {
   @override
   void dispose() {
     _commitPendingIdleCoins();
-    _ticker.cancel();
     super.dispose();
   }
 }

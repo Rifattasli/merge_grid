@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/app_theme.dart';
+import '../../../../app/app_widgets.dart';
+
 class PauseOverlay extends StatelessWidget {
   const PauseOverlay({
     super.key,
@@ -13,46 +16,61 @@ class PauseOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: Colors.black45,
+      color: AppColors.scrim,
       child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 320),
-          child: Container(
-            margin: const EdgeInsets.all(24),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFFBF5),
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Paused',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Take a breath, then jump back in.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: onResumePressed,
-                    child: const Text('Resume'),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 320),
+            child: AppPanel(
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              radius: AppRadii.lg,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: AppColors.surfaceAlt,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.pause_rounded,
+                      color: AppColors.coral,
+                      size: 30,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: onRestartPressed,
-                    child: const Text('New Game'),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Paused',
+                    style: Theme.of(context).textTheme.displaySmall,
                   ),
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.sm),
+                  const Text(
+                    'Take a breath, then jump back in.',
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppPrimaryButton(
+                      label: 'Resume',
+                      icon: Icons.play_arrow_rounded,
+                      onPressed: onResumePressed,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppSecondaryButton(
+                      label: 'New Game',
+                      icon: Icons.refresh_rounded,
+                      onPressed: onRestartPressed,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../app/app_theme.dart';
+
 class GameHud extends StatelessWidget {
   const GameHud({
     super.key,
@@ -19,15 +21,15 @@ class GameHud extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFFCF7),
-        borderRadius: BorderRadius.circular(24),
+        color: AppColors.surface.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 18,
-            offset: Offset(0, 8),
+            color: AppColors.shadow,
+            blurRadius: 12,
+            offset: Offset(0, 6),
           ),
         ],
       ),
@@ -40,7 +42,7 @@ class GameHud extends StatelessWidget {
               accentColor: const Color(0xFFEF9B57),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: _HudStatCard(
               label: 'Best',
@@ -48,29 +50,32 @@ class GameHud extends StatelessWidget {
               accentColor: const Color(0xFF5E8B7E),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Expanded(
             child: _HudStatCard(
               label: 'Coins',
               value: '$coins',
-              accentColor: const Color(0xFFE0B83F),
+              accentColor: AppColors.butter,
               trailing: hasIdleCoinFlow
                   ? const _IdleCoinIndicator()
-                  : const SizedBox(height: 16),
+                  : const SizedBox(height: 12),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF3E7D4),
-              borderRadius: BorderRadius.circular(18),
+              color: AppColors.surfaceAlt,
+              borderRadius: BorderRadius.circular(16),
             ),
             child: IconButton.filledTonal(
               onPressed: onPausePressed,
               tooltip: 'Pause',
               style: IconButton.styleFrom(
-                backgroundColor: const Color(0xFFF3E7D4),
-                foregroundColor: const Color(0xFF5A4A3C),
+                backgroundColor: AppColors.surfaceAlt,
+                foregroundColor: AppColors.cocoa,
+                minimumSize: const Size(44, 44),
+                padding: const EdgeInsets.all(10),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               icon: const Icon(Icons.pause_rounded),
             ),
@@ -97,7 +102,7 @@ class _HudStatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -107,21 +112,22 @@ class _HudStatCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: accentColor.withValues(alpha: 0.25)),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: accentColor.withValues(alpha: 0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             label,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: const Color(0xFF7B6A58),
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: AppColors.cocoaSoft,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
             transitionBuilder: (Widget child, Animation<double> animation) {
@@ -133,14 +139,14 @@ class _HudStatCard extends StatelessWidget {
             child: Text(
               value,
               key: ValueKey<String>(value),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: const Color(0xFF3A2E24),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: AppColors.cocoa,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
-          const SizedBox(height: 6),
-          trailing ?? const SizedBox(height: 16),
+          const SizedBox(height: 2),
+          trailing ?? const SizedBox(height: 12),
         ],
       ),
     );
@@ -173,13 +179,14 @@ class _IdleCoinIndicatorState extends State<_IdleCoinIndicator>
       opacity: Tween<double>(begin: 0.45, end: 1).animate(_controller),
       child: Row(
         children: [
-          const Icon(Icons.circle, size: 8, color: Color(0xFFE0B83F)),
-          const SizedBox(width: 6),
+          const Icon(Icons.circle, size: 6, color: AppColors.butter),
+          const SizedBox(width: 4),
           Text(
             'idle',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: const Color(0xFF9A7A17),
+              color: AppColors.cocoaSoft,
               fontWeight: FontWeight.w700,
+              fontSize: 10,
             ),
           ),
         ],

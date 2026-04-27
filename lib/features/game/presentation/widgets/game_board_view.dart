@@ -24,9 +24,11 @@ class _GameBoardViewState extends State<GameBoardView> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: GameWidget<MergeGame>(game: _game),
+    return RepaintBoundary(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(28),
+        child: GameWidget<MergeGame>(game: _game),
+      ),
     );
   }
 }
